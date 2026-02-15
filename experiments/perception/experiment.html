@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+      Language Experiment
+    </title><!--JS-->
+    <!-- external general utilities -->
+    <script src="shared/js/jquery-1.11.1.min.js"></script>
+    <script src="shared/full-projects/jquery-ui/jquery-ui.min.js"></script>
+    <script src="shared/js/underscore-min.js"></script>
+
+    <!-- experiment logic -->
+    <script src="shared/js/exp-V2.js"></script>
+    <script src="shared/js/stream-V2.js"></script>
+
+    <!-- utilities to submit data to proliferate -->
+    <script src="https://proliferate.alps.science/static/js/proliferate.js"></script>
+
+    <!-- general utilities -->
+    <script src="shared/js/browserCheck.js"></script>
+    <script src="shared/js/utils.js"></script>
+    <link href="shared/full-projects/jquery-ui/jquery-ui.min.css" rel="stylesheet" type="text/css">
+    <link href="shared/css/cocolab-style.css" rel="stylesheet" type="text/css">
+    <link href="css/local-style.css" rel="stylesheet" type="text/css">
+
+    <!-- experiment file -->
+    <script src="js/experiment.js"></script>
+
+    <!-- stimulus file -->
+    <script src="js/stimuli.js"></script>
+  </head>
+
+  <body onload="init()">
+    <noscript>This task requires JavaScript.</noscript>
+
+    <!-- TODO : fix error: 
+      GET https://sarangjeong.github.io/favicon.ico 404
+      Failed to load resource: the server responded with a status of 404 () -->
+    <!-- initial slide -->
+    <div class="slide" id="i0">
+      <p class="center"><small>
+        <!-- Title text "실험 2" -->
+        <h1>실험 2</h1>
+
+        <font color="red">
+        <br>
+        이 실험에 참가하기 위해서는 반드시 <strong><u>조용한 장소</u></strong>에서 
+        <strong><u>이어폰/헤드셋</u></strong>을 착용한 상태여야 합니다. 
+        (이어폰/헤드셋이 없을 경우 스피커를 사용해 주세요.) 
+        휴대폰은 <strong><u>무음</u></strong>으로 설정해 주세요. <br>
+        <br>
+        스마트폰으로는 실험 참가가 어려우니, <strong><u>컴퓨터</u></strong>를 사용해 주시기 바랍니다. <br>
+        웹 브라우저는 <strong><u>구글 크롬</u></strong> 사용을 권장합니다. <br>
+        <br>
+        지금 주변이 시끄럽거나, 이어폰/헤드셋/컴퓨터를 사용하기 어려운 상황이라면, 
+        실험을 지금 시작하지 마시고 나중에 해당 조건이 만족될 때 시작해 주세요. <br>
+        </font>
+      </small></p>
+      <p class="center"><small>
+        <br>
+        이 실험은 한국어 단어를 듣고, 그 단어를 주어진 선택지 중에서 고르는 실험입니다. <br>
+        확실하지 않을 때는 가장 비슷한 선택지를 고르시면 됩니다. <br>
+        이 실험의 소요 시간은 약 30분입니다. <br>
+        <br>
+        우선 소리가 잘 들리는지 확인하는 절차를 갖겠습니다. 
+        3개의 문장을 듣고 질문에 답변하세요. <br>
+        <u>2번 이상 오답을 고르시면 실험을 진행하실 수 없으며, 
+          참가비를 받으실 수 없습니다.</u><br>
+        <br>
+        <strong>아래 버튼을 클릭하면 곧바로 오디오가 재생됩니다.</strong><br>
+      </small></p>
+      <button id="start_button" type="button">실험 시작</button>
+    </div>
+
+    <!-- audio check 1 -->
+    <div class="slide" id="check1"> <!-- instead of id="audio_check" -->
+      <br>
+      <h3><strong>문장을 듣고 질문에 대답하세요.</strong></h3>
+      <p>소리가 잘 안 들린다면 시스템 볼륨을 조정해 주세요.</p>
+    <audio controls id="audio_check1">
+    <source src="audio/check1.wav" type="audio/wav">
+       브라우저가 오디오 재생을 지원하지 않습니다.
+    </audio>
+      <br><br>
+    <div class="question">
+      <p>지현이의 고향은 어디입니까?</p>
+      <br>
+      <label><input type="radio"  name="number" value="false"/>댁</label>
+      <label><input type="radio"  name="number" value="false"/>대구</label>
+      <label><input type="radio"  name="number" value="true"/>철원</label>
+      <label><input type="radio"  name="number" value="false"/>설원</label>
+      <br><br><br><br>
+
+      <button onclick="_s.button()">다음</button>
+      <div class="err">
+        <br><p2><strong>문장을 다시 듣고 정답을 골라주세요.</strong></p2></div>
+      <div class="failure">
+        <br><p2><strong>죄송합니다. 정답률이 낮아 실험에 참가할 수 없습니다.</strong></p2></div>
+      </div>
+    </div>
+
+        <!-- audio check 2 -->
+    <div class="slide" id="check2"> <!-- instead of id="audio_check" -->
+      <br>
+      <h3><strong>문장을 듣고 질문에 대답하세요.</strong></h3>
+      <p>소리가 잘 안 들린다면 시스템 볼륨을 조정해 주세요.</p>
+    <audio controls id="audio_check2">
+    <source src="audio/check2.wav" type="audio/wav">
+       브라우저가 오디오 재생을 지원하지 않습니다.
+    </audio>
+      <br><br>
+    <div class="question">
+      <p>현동이는 샌드위치를 몇 개 받았습니까?</p>
+      <br>
+      <label><input type="radio"  name="number" value="false"/>0개</label>
+      <label><input type="radio"  name="number" value="false"/>1개</label>
+      <label><input type="radio"  name="number" value="true"/>2개</label>
+      <label><input type="radio"  name="number" value="false"/>3개</label>
+      <br><br><br><br>
+
+      <button onclick="_s.button()">다음</button>
+      <div class="err">
+        <br><p2><strong>문장을 다시 듣고 정답을 골라주세요.</strong></p2></div>
+      <div class="failure">
+        <br><p2><strong>죄송합니다. 정답률이 낮아 실험에 참가할 수 없습니다.</strong><br>
+          5초 뒤에 실험이 자동으로 종료됩니다.</p2></div>
+      </div>
+    </div>
+
+    <!-- audio check 3 -->
+    <div class="slide" id="check3"> <!-- instead of id="audio_check" -->
+      <br>
+      <h3><strong>문장을 듣고 질문에 대답하세요.</strong></h3>
+      <p>소리가 잘 안 들린다면 시스템 볼륨을 조정해 주세요.</p>
+    <audio controls id="audio_check3">
+    <source src="audio/check3.wav" type="audio/wav">
+       브라우저가 오디오 재생을 지원하지 않습니다.
+    </audio>
+      <br><br>
+    <div class="question">
+      <p>영훈이는 무엇을 받았습니까?</p>
+      <br>
+      <label><input type="radio"  name="number" value="false"/>공</label>
+      <label><input type="radio"  name="number" value="false"/>책</label>
+      <label><input type="radio"  name="number" value="false"/>은선</label>
+      <label><input type="radio"  name="number" value="true"/>공책</label>
+      <br><br><br><br>
+
+      <button onclick="_s.button()">다음</button>
+      <div class="err">
+        <br><p2><strong>문장을 다시 듣고 정답을 골라주세요.</strong></p2></div>
+      <div class="failure">
+        <br><p2><strong>죄송합니다. 정답률이 낮아 실험에 참가할 수 없습니다.</strong><br>
+          5초 뒤에 실험이 자동으로 종료됩니다.</p2></div>
+      </div>
+    </div>
+
+    <!-- practice instructions slide -->
+    <div class="slide" id="startPractice">
+      <br>
+      <br>
+      <p id="practiceInstruction" class="center">
+        잘 하셨습니다! 이제 실제 실험을 시작하기에 앞서 연습을 해볼 것입니다. 단어를 듣고, 주어진 선택지 중에서 그 단어를 골라 주세요. 
+        확실하지 않을 때는 가장 비슷한 선택지를 고르시면 됩니다. 연습 단계에서는 10개의 단어를 듣게 됩니다.
+      </p>
+      <div class="center">
+        <button class="continueButton" onclick="_s.button()">다음</button>
+      </div>
+    </div>
+
+    <!-- practice slide -->
+    <div class="slide" id="practice">
+      <h3>
+        연습 단계
+      </h3>
+
+      <!-- audio -->
+      <audio id="stim_p">
+        <source id="wav_src_p" src="" type="audio/wav">브라우저가 오디오 재생을 지원하지 않습니다.</audio>
+
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 50vh; text-align: center;">
+        <!-- Instruction text -->
+        <div class="instruction">
+          <i>방금 들린 단어를 고르세요. <br>
+          키보드 숫자키 1, 2, 3을 눌러서 단어를 선택하고 <br>
+          키보드 엔터키를 눌러서 다음으로 넘어갈 수 있습니다. <br>
+          <br>
+          확실하지 않을 때는 가장 비슷한 선택지를 고르시면 됩니다. <br>
+          <b>단어가 잘 안 들린다면 시스템 볼륨을 조정해 주세요.</b></i>
+        </div>
+    
+        <!-- Options aligned horizontally -->
+        <div style="display: flex; gap: 20px; margin-top: 20px;">
+            <div id="lenis_p"></div>
+            <div id="tense_p"></div>
+            <div id="asp_p"></div>
+        </div>
+    </div>
+      <!-- Checkbox in a button when the user didn't hear the sound-->
+      <div class="center">
+        <input type="checkbox" id="not_heard_p" name="not_heard_p" value="not_heard_p">
+        <label for="not_heard_p">소리를 못 들었을 경우, 아무 단어나 고른 뒤에 이 박스에 체크해 주세요.</label>
+      </div>
+
+      <br>
+
+      <div class="center">
+        <button class="continueButton" onclick="_s.button()" onfocus="this.blur()">다음</button>
+      </div>
+      <div class="err"> <!-- Hidden unless participant clicks Continue without choosing one. -->
+        <p>
+          <strong>"다음" 버튼을 클릭하기 전에 단어 중 하나를 선택하세요.</strong>
+        </p>
+      </div>
+    </div>
+
+    <!-- main instructions slide -->
+    <div class="slide" id="startExp">
+      <br>
+      <br>
+      <p id="instruct-text" class="center">
+        잘 하셨습니다! 이제 실제 실험을 시작하겠습니다. 실험은 9개의 세션으로 구성되어 있습니다. 각 세션에서는 64개의 단어를 듣게 됩니다. 
+        단어를 듣고, 주어진 선택지 중에서 그 단어를 골라 주세요. 확실하지 않을 때는 가장 비슷한 선택지를 고르시면 됩니다. 
+        아래 버튼을 클릭하면 첫 번째 세션이 시작됩니다.
+      </p>
+      <div class="center">
+        <button class="continueButton" onclick="_s.button()">다음</button>
+      </div>
+    </div>
+
+    <!-- trial slide -->
+    <div class="slide" id="trial">
+      <audio id="stim">
+        <source id="wav_src" src="" type="audio/wav">브라우저가 오디오 재생을 지원하지 않습니다.</audio>
+
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 50vh; text-align: center;">
+          <!-- Instruction text -->
+          <div class="instruction">
+              <i>방금 들린 단어를 고르세요. <br>
+              키보드 숫자키 1, 2, 3을 눌러서 단어를 선택하고 <br>
+              키보드 엔터키를 눌러서 다음으로 넘어갈 수 있습니다. <br>
+              <br>
+              확실하지 않을 때는 가장 비슷한 선택지를 고르시면 됩니다. <br>
+            </i>
+          </div>
+      
+          <!-- Options aligned horizontally -->
+          <div style="display: flex; gap: 20px; margin-top: 20px;">
+              <div id="lenis">Lenis Content</div>
+              <div id="tense">Tense Content</div>
+              <div id="asp">Asp Content</div>
+          </div>
+      </div>
+      <div class="center">
+        <input type="checkbox" id="not_heard" name="not_heard" value="not_heard">
+        <label for="not_heard">소리를 못 들었을 경우, 아무 단어나 고른 뒤에 이 박스에 체크해 주세요.</label>
+      </div>
+
+      <br>
+
+      <div class="center">
+        <button class="continueButton" onclick="_s.button()" onfocus="this.blur()">다음</button>
+      </div>
+      <div class="err">
+        <p>
+          <strong>"다음" 버튼을 클릭하기 전에 단어 중 하나를 선택하세요.</strong>
+        </p>
+      </div>
+    </div>
+
+    <!-- break slide -->
+    <div class="slide" id="break">
+      <br>
+      <br>
+      <p id="break-text" class="center">
+        이제 한 세션이 끝났습니다. <br>
+        잠시 휴식을 취하셔도 됩니다. <br>
+        다음 세션을 시작할 준비가 되면 아래 버튼을 클릭하세요.
+      </p>
+      <div class="center">
+        <button class="continueButton" onclick="_s.button()">다음</button> 
+    </div>
+    </div>
+
+    <!-- subject information slide -->
+    <!-- TO DO : box is too small -->
+    <div class="slide" id="subj_info">
+      <div class="long_form">
+        <div class="subj_info_title">
+          언어 배경 설문
+        </div>
+        <p class="info">
+          <br>
+          이 연구에 참여하는 것은 전적으로 자발적입니다. 
+          그러나 (선택) 표시가 없는 질문들은 연구 결과를 이해하는 데에 필수적이므로, 
+          참여를 계속 진행하기 위해서는 답변해 주시기를 부탁드립니다. 
+          (선택) 표시가 된 질문들은 건너뛰어도 무방합니다. 
+          원하지 않는 경우, 귀하께서는 필수 질문을 포함해 
+          모든 질문에 답변하지 않을 권리가 있습니다. 
+        </p>
+        <p>
+          <b>성별</b> <select id="gender">
+            <option value="">
+            </option>
+            <option value="Male">
+              남
+            </option>
+            <option value="Female">
+              여
+            </option>
+            <option value="Other">
+              그외
+            </option>
+          </select>
+          <b>만 나이</b> <input type="number" id="age">
+        </p>
+        <p>
+          <b>모국어 방언</b> <input type="text" id="language">
+        </p><label>어릴 적 집에서 사용했던 방언(들) <br>
+        예: 서울말, 강원도 사투리</label>
+        <p>
+          <b>주양육자 방언</b> <input type="text" id="language_parents">
+        </p><label>어릴 적 주양육자(들)이 사용했던 방언(들) <br>
+        예: 어머니 서울말, 아버지 경상북도 대구 사투리, 할머니 전라북도 사투리</label>
+        <p>
+          <b>그외에 할 줄 아는 언어와 구사 수준</b> <input type="text" id="language_other">
+        </p><label>예: 영어(고급), 중국어(중급), 일본어(초급)</label>
+        <p><b>평소 대화 상대의 연령대</b> (합이 100이 되도록 답변해 주세요)<br>
+          <!-- <label>예: 10대 이하: 0, 20대: 50, 30대: 10, 40대: 10, 50대: 30, 60대 이상: 0</label><br> -->
+          10대 이하: <input type="number" id="interaction_10">%&nbsp;&nbsp;
+          20대: <input type="number" id="interaction_20">%&nbsp;&nbsp;
+          30대: <input type="number" id="interaction_30">%<br>
+          40대: <input type="number" id="interaction_40">%&nbsp;&nbsp;
+          50대: <input type="number" id="interaction_50">%&nbsp;&nbsp;
+          60대 이상: <input type="number" id="interaction_60">%
+        </p>
+        <p>
+          <b>청각 장애 및 청각 관련 병력</b>
+        <select id="impairment">
+          <option value="-1">
+          </option>
+          <option value="0">
+            없음
+          </option>
+          <option value="1">
+            있음
+          </option>
+          <option value="2">
+            모름
+          </option>
+          <option value="3">
+            응답 거부
+          </option>
+        </select>
+        </p>
+        <p>
+          <b>사용한 오디오 기기 종류</b>
+        <select id="equipment_type">
+          <option value="-1">
+          </option>
+          <option value="headphone">
+            헤드셋
+          </option>
+          <option value="earphone">
+            이어폰
+          </option>
+          <option value="speaker">
+            외장 스피커
+          </option>
+          <option value="laptop_speaker">
+            노트북 내장 스피커
+          </option>
+        </select>
+        </p>
+        <p>
+          (선택) 이어폰/헤드셋/스피커 모델명 (예: 에어팟 프로 3세대) <input type="text" id="equipment_model">
+        </p>
+        <p>
+          (선택) 나는 지시사항을 모두 읽고 단어를 듣고 고를 때 주의를 기울였다
+        <select id="assess">
+          <option value="-1">
+          </option>
+          <option value="Yes">
+            그렇다
+          </option>
+          <option value="No">
+            아니다
+          </option>
+          <option value="Confused">
+            헷갈렸다
+          </option>
+        </select> 
+        </p>
+        <p>
+          (선택) 참가비에 대한 평가
+        <select id="fairprice">
+          <option value="-1">
+          </option>
+          <option value="0">
+            너무 적었다
+          </option>
+          <option value="1">
+            적절했다
+          </option>
+        </select>
+          (선택) 실험에 대한 평가
+          <select id="enjoyment">
+          <option value="-1">
+          </option>
+          <option value="0">
+            평균적인 실험보다 별로였다
+          </option>
+          <option value="1">
+            평균적인 실험이었다
+          </option>
+          <option value="2">
+            평균적인 실험보다 좋았다
+          </option>
+        </select>
+        </p>
+        <p>
+          (선택) 이 실험에 대해 하고 싶은 말씀이 있으시다면 알려주세요.
+        </p>
+        <textarea id="comments" rows="2" cols="50"></textarea><br>
+        <button onclick="_s.submit()">제출</button>
+      </div>
+      <div class="err">
+        <p>
+        <strong>"제출" 버튼을 클릭하기 전에 필수 항목을 모두 작성해 주세요.</strong>
+        </p>
+      </div>
+      <div class="err_age">
+        <p>
+        <strong>대화 상대방 연령 비중의 합이 100이 되도록 응답해 주세요.</strong>
+        </p>
+      </div>
+    </div>
+
+    <!-- final slide -->
+    <div id="thanks" class="slide js">
+      <p class="big">
+        <br>
+        귀한 시간 내주셔서 감사합니다!
+      </p>
+    </div>
+
+    <!-- progress bar -->
+    <div class="progress">
+      <span>진행 상황: </span>
+      <div class="bar-wrapper">
+        <div class="bar" style="width: 0%"></div>
+      </div>
+    </div>
+  </body>
+</html>
