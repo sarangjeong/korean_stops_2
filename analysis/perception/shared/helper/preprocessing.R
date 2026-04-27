@@ -39,6 +39,12 @@ basic_data_preprocessing <- function(
   subject_info <- read.csv(subject_information_csv_path)
   subject_info <- subject_info %>%
     mutate(across(c(enjoyment, equipment_type, fairprice, gender, impairment), as.factor))
+
+  subject_cols_to_keep <- c(
+    "workerid", "YOB", "age", "comments", "enjoyment", "equipment_type", "fairprice",
+    "interaction_10", "interaction_20", "interaction_30", "interaction_40", "interaction_50", "interaction_60",
+    "language", "language_other", "language_parents", "gender", "impairment"
+  )
   
   # remove rows with <no-id>
   trials <- trials %>%
@@ -55,11 +61,12 @@ basic_data_preprocessing <- function(
   subject_info$age[subject_info$age == 196707] <- 2024-1967
   subject_info$age[subject_info$age == -59] <- 59
   subject_info$age[subject_info$age == 3111] <- 31
-  
+  subject_info <- subject_info %>%
+    dplyr::select(any_of(subject_cols_to_keep))
   # merge data
   nrow(trials)
   stops <- trials %>%
-    left_join(.,subject_info,by=c("workerid")) %>%
+    left_join(., subject_info, by = c("workerid")) %>%
     left_join(.,worker_id_map,by=c("workerid"))
   nrow(stops) # check if # of rows did not change
   
