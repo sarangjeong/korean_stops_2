@@ -1,7 +1,15 @@
 # ===== SET UP =====
 
 # set working directory
-this.dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+this.dir <- tryCatch(
+  dirname(normalizePath(sys.frame(1)$ofile)),
+  error = function(e) {
+    tryCatch(
+      dirname(rstudioapi::getSourceEditorContext()$path),
+      error = function(e2) getwd()
+    )
+  }
+)
 setwd(this.dir)
 
 # load libraries
@@ -33,16 +41,18 @@ data$phonation <- factor(data$phonation, levels = c("aspirated", "fortis", "leni
 data$phonation <- relevel(data$phonation, ref = "lenis")
 data$gender <- factor(data$gender, levels = c("Female", "Male"), labels = c("female", "male"))
 
-# 확인
+# 확인 및 NA 제거
 sum(is.na(data$phonation))  # 0 이어야 함
+data <- data[!is.na(data$vot), ]  # vot NA 제거
+data <- data[!is.na(data$f0), ]   # f0 NA 제거
 
-# 3) overlap용 벡터 생성 (+ 결측 제거)
+# 3) overlap용 벡터 생성
 young_female_asp_vot <- with(data, vot[phonation == "aspirated" & gender == "female" & age < 40])
 young_female_lenis_vot <- with(data, vot[phonation == "lenis" & gender == "female" & age < 40])
 
 vot_list <- list(
-  Aspirated = na.omit(young_female_asp_vot),
-  Lenis = na.omit(young_female_lenis_vot)
+  Aspirated = young_female_asp_vot,
+  Lenis = young_female_lenis_vot
 )
 
 vot_ovl_asp_lenis_young_female <- overlap(vot_list)$OV
@@ -51,8 +61,8 @@ vot_ovl_asp_lenis_young_female <- overlap(vot_list)$OV
 old_female_asp_vot <- data$vot[data$phonation == "aspirated" & data$gender == "female" & data$age > 59]
 old_female_lenis_vot <- data$vot[data$phonation == "lenis" & data$gender == "female" & data$age > 59]
 vot_list <- list(
-  Aspirated = na.omit(old_female_asp_vot),
-  Lenis = na.omit(old_female_lenis_vot)
+  Aspirated = old_female_asp_vot,
+  Lenis = old_female_lenis_vot
 )
 vot_ovl_asp_lenis_old_female <- overlap(vot_list)$OV
 
@@ -493,28 +503,28 @@ age_mean <- mean(data$age, na.rm = TRUE)
 age_sd <- sd(data$age, na.rm = TRUE)
 
 # 시나리오 생성 (OUTDATED) /////
-scenarios <- expand.grid(
-  phonation = c("lenis", "aspirated", "fortis"),
-  gender = c("female", "male"),
-  normed_age = c(-1, 0, 1),  # -1SD, mean, +1SD
-  poa = "coronal",
-  normed_word_duration = 0,
-  z_log_morpheme_freq = 0
-)
-
-# 시나리오 생성 (실제 나이 사용)
 # scenarios <- expand.grid(
-#   phonation = c("aspirated", "fortis", "lenis"),
+#   phonation = c("lenis", "aspirated", "fortis"),
 #   gender = c("female", "male"),
-#   age = 20:72,  # 20세부터 72세까지 모든 정수
+#   normed_age = c(-1, 0, 1),  # -1SD, mean, +1SD
 #   poa = "coronal",
 #   normed_word_duration = 0,
 #   z_log_morpheme_freq = 0
-# ) %>%
-#   dplyr::mutate(
-#     normed_age = (age - age_mean) / age_sd,  # normed_age 계산
-#     phonation = factor(phonation, levels = c("aspirated", "fortis", "lenis"))
-#   )
+# )
+
+# 시나리오 생성 (실제 나이 사용)
+scenarios <- expand.grid(
+  phonation = c("aspirated", "fortis", "lenis"),
+  gender = c("female", "male"),
+  age = 20:72,  # 20세부터 72세까지 모든 정수
+  poa = "coronal",
+  normed_word_duration = 0,
+  z_log_morpheme_freq = 0
+) %>%
+  dplyr::mutate(
+    normed_age = (age - age_mean) / age_sd,  # normed_age 계산
+    phonation = factor(phonation, levels = c("lenis", "aspirated", "fortis"))
+  )
 
 # 예측
 # m_vot predictions are on log scale; back-transform to VOT ms.
@@ -663,7 +673,7 @@ write.csv(vot_random_effects, out_file("vot_model_random_effects.csv"), row.name
 
 
 
-# TODO: refine word_duration in Praat and measure again
+# TODO: remove word duration from VOT model
 # TODO: DISCUSS W INSEONG - think about reference level and coding method (dummy, difference, helmert, etc)
 # TODO: DISCUSS W INSEONG - regression without interaction? maybe predict VOT & f0 using stop_category only,
 #       and then predict the coefficients of each stop_category using gender & age?

@@ -171,20 +171,31 @@ p2 / p4 +
 ggsave(out_file("vot_f0_predicted_lines.png"), width = 3, height = 5, dpi = 300, bg = "white")
 
 # ===== Model Predictions With CI =====
-
 pred_vot <- ggpredict(m_vot,
                       terms = c("normed_age [-2:2, by=0.1]",
                                 "phonation",
                                 "gender"))
 
-pred_vot <- pred_vot %>%
+pred_vot_df <- as.data.frame(pred_vot) %>%
   mutate(
     predicted = exp(predicted),
     conf.low = exp(conf.low),
-    conf.high = exp(conf.high)
+    conf.high = exp(conf.high),
+    group = factor(group, levels = c("lenis", "aspirated", "fortis")),
+    facet = factor(facet, levels = c("female", "male"))
   )
 
-p1 <- plot(pred_vot) +
+cat("\n===== VOT Predictions Debug =====\n")
+cat("pred_vot_df dimensions:", nrow(pred_vot_df), "x", ncol(pred_vot_df), "\n")
+cat("pred_vot_df columns:", paste(names(pred_vot_df), collapse = ", "), "\n")
+print(table(pred_vot_df$facet, pred_vot_df$group))
+
+p1 <- ggplot(pred_vot_df, aes(x = x, y = predicted, color = group, fill = group)) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, group = interaction(group, facet)),
+              alpha = 0.15, color = NA) +
+  geom_line(aes(group = interaction(group, facet)), linewidth = 0.5) +
+  facet_wrap(~ facet, nrow = 1) +
+  scale_x_continuous(breaks = seq(-2, 2, by = 1), limits = c(-2, 2)) +
   scale_color_manual(
     name = "Stop Category",
     values = c("lenis" = "#1f77b4",
@@ -205,7 +216,23 @@ pred_f0 <- ggpredict(m_f0,
                                "phonation",
                                "gender"))
 
-p2 <- plot(pred_f0) +
+pred_f0_df <- as.data.frame(pred_f0) %>%
+  mutate(
+    group = factor(group, levels = c("lenis", "aspirated", "fortis")),
+    facet = factor(facet, levels = c("female", "male"))
+  )
+
+cat("\n===== F0 Predictions Debug =====\n")
+cat("pred_f0_df dimensions:", nrow(pred_f0_df), "x", ncol(pred_f0_df), "\n")
+cat("pred_f0_df columns:", paste(names(pred_f0_df), collapse = ", "), "\n")
+print(table(pred_f0_df$facet, pred_f0_df$group))
+
+p2 <- ggplot(pred_f0_df, aes(x = x, y = predicted, color = group, fill = group)) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, group = interaction(group, facet)),
+              alpha = 0.15, color = NA) +
+  geom_line(aes(group = interaction(group, facet)), linewidth = 0.5) +
+  facet_wrap(~ facet, nrow = 1) +
+  scale_x_continuous(breaks = seq(-2, 2, by = 1), limits = c(-2, 2)) +
   scale_color_manual(
     name = "Stop Category",
     values = c("lenis" = "#1f77b4",
