@@ -27,15 +27,38 @@ library(effects)
 library(emmeans)
 library(overlapping)
 
+# ===== FLAGS =====
+exclude_gyeongsang <- TRUE  # Set to FALSE to include Gyeongsang dialect speakers
+gyeongsang_prolific_ids <- c(211, 621)  # Participant IDs to exclude
+
 # All exported files (csv/png) are written here.
 output_dir <- "./output"
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
-out_file <- function(filename) file.path(output_dir, filename)
+
+# Add suffix to filenames based on flags
+suffix <- if (exclude_gyeongsang) "_no_gyeongsang" else ""
+custom_out_file <- function(filename) {
+  # Replace .csv, .rds, or .png extension with suffix + extension
+  if (grepl("\\.(csv|rds|png)$", filename)) {
+    filename <- sub("(\\.(csv|rds|png))$", paste0(suffix, "\\1"), filename)
+  } else {
+    filename <- paste0(filename, suffix)
+  }
+  file.path(output_dir, filename)
+}
 
 # 1) 깨끗하게 다시 로드
 data <- read.csv("./output/production_preprocessed_data.csv", stringsAsFactors = FALSE)
 
 # 2) 전처리
+# 경상 방언 사용자 제외 (if flagged) - prolific_id 211, 621 제외
+if (exclude_gyeongsang) {
+  cat("Excluding Gyeongsang dialect speakers (prolific_id", paste(gyeongsang_prolific_ids, collapse=", "), ")...\n")
+  cat("Before filtering: ", nrow(data), " rows\n")
+  data <- data[!(data$prolific_id %in% gyeongsang_prolific_ids), ]
+  cat("After filtering: ", nrow(data), " rows\n")
+}
+
 data$prolific_id <- as.factor(data$prolific_id)
 data$phonation <- factor(data$phonation, levels = c("aspirated", "fortis", "lenis"))
 data$phonation <- relevel(data$phonation, ref = "lenis")
@@ -412,7 +435,7 @@ m_vot_result <- m_vot_result %>%
   ))
 
 # 3. CSV로 저장
-write.csv(m_vot_result, out_file("vot_lmer_results_with_p_values.csv"), row.names = FALSE)
+write.csv(m_vot_result, custom_out_file("vot_lmer_results_with_p_values.csv"), row.names = FALSE)
 
 # === F0 MODELS ===
 
@@ -532,7 +555,7 @@ scenarios$predicted_vot <- exp(predict(m_vot, newdata = scenarios, re.form = NA)
 scenarios$predicted_f0 <- predict(m_f0, newdata = scenarios, re.form = NA)
 
 scenarios
-write.csv(scenarios, out_file("vot_f0_predictions.csv"), row.names = FALSE)
+write.csv(scenarios, custom_out_file("vot_f0_predictions.csv"), row.names = FALSE)
 
 # 또는 더 깔끔하게 정리해서 저장
 scenarios_clean <- scenarios %>%
@@ -542,7 +565,7 @@ scenarios_clean <- scenarios %>%
   ) %>%
   dplyr::arrange(gender, phonation, normed_age)
 
-write.csv(scenarios_clean, out_file("vot_f0_predictions_clean.csv"), row.names = FALSE)
+write.csv(scenarios_clean, custom_out_file("vot_f0_predictions_clean.csv"), row.names = FALSE)
 
 # ===== Lenis stops만 =====
 
@@ -627,7 +650,7 @@ anova(m_vot_fortis_no_freq, m_vot_fortis)
 vot_fixed_effects <- tidy(m_vot, effects = "fixed")
 
 # CSV 저장
-write.csv(vot_fixed_effects, out_file("vot_model_fixed_effects.csv"), row.names = FALSE)
+write.csv(vot_fixed_effects, custom_out_file("vot_model_fixed_effects.csv"), row.names = FALSE)
 
 # 예쁘게 정리
 vot_fixed_effects_clean <- vot_fixed_effects %>%
@@ -646,7 +669,7 @@ vot_fixed_effects_clean <- vot_fixed_effects %>%
   ) %>%
   dplyr::select(term, estimate, std.error, statistic, p.value, sig)
 
-write.csv(vot_fixed_effects_clean, out_file("vot_model_fixed_effects_clean.csv"), row.names = FALSE)
+write.csv(vot_fixed_effects_clean, custom_out_file("vot_model_fixed_effects_clean.csv"), row.names = FALSE)
 
 # === Random effects 표 ===
 # VarCorr를 DataFrame으로
@@ -669,7 +692,7 @@ vot_random_effects <- vot_random_effects %>%
     term2 = var2
   )
 
-write.csv(vot_random_effects, out_file("vot_model_random_effects.csv"), row.names = FALSE)
+write.csv(vot_random_effects, custom_out_file("vot_model_random_effects.csv"), row.names = FALSE)
 
 
 
@@ -682,7 +705,7 @@ write.csv(vot_random_effects, out_file("vot_model_random_effects.csv"), row.name
 f0_fixed_effects <- tidy(m_f0, effects = "fixed")
 
 # CSV 저장
-write.csv(f0_fixed_effects, out_file("f0_model_fixed_effects.csv"), row.names = FALSE)
+write.csv(f0_fixed_effects, custom_out_file("f0_model_fixed_effects.csv"), row.names = FALSE)
 
 # 예쁘게 정리
 f0_fixed_effects_clean <- f0_fixed_effects %>%
@@ -701,7 +724,7 @@ f0_fixed_effects_clean <- f0_fixed_effects %>%
   ) %>%
   dplyr::select(term, estimate, std.error, statistic, p.value, sig)
 
-write.csv(f0_fixed_effects_clean, out_file("f0_model_fixed_effects_clean.csv"), row.names = FALSE)
+write.csv(f0_fixed_effects_clean, custom_out_file("f0_model_fixed_effects_clean.csv"), row.names = FALSE)
 
 # === Random effects 표 ===
 # VarCorr를 DataFrame으로
@@ -724,5 +747,5 @@ f0_random_effects <- f0_random_effects %>%
     term2 = var2
   )
 
-write.csv(f0_random_effects, out_file("f0_model_random_effects.csv"), row.names = FALSE)
+write.csv(f0_random_effects, custom_out_file("f0_model_random_effects.csv"), row.names = FALSE)
 

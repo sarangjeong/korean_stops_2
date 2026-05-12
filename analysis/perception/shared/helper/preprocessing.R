@@ -96,6 +96,7 @@ basic_data_preprocessing <- function(
   
   # 2) kyungsang dialect: 3 (I manually checked the subject info data to identify KS speakers)
   # TODO: if I collect more data, do the manual checking again!
+  # TODO: include kyungsang speakers! Q. how to sometimes include and sometimes exclude them?
   ks_speaker_workerid <- c("426", "326", "635")
   stops <- stops[!(stops$workerid %in% ks_speaker_workerid) ,]
   
