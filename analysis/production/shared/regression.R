@@ -572,7 +572,7 @@ data_lenis <- data %>%
 
 m_vot_lenis <- lmer(
   vot ~ gender:normed_age
-  + poa  + normed_word_duration + z_log_morpheme_freq + rime
+  + poa  + normed_word_duration + z_log_morpheme_freq 
   + (1 | prolific_id) + (1 | item),
   data = data_lenis
 )
@@ -598,7 +598,7 @@ data_asp <- data %>%
 
 m_vot_asp <- lmer(
   vot ~ gender:normed_age
-  + poa  + normed_word_duration + z_log_morpheme_freq + rime
+  + poa  + normed_word_duration + z_log_morpheme_freq 
   + (1 | prolific_id) + (1 | item),
   data = data_asp
 )
