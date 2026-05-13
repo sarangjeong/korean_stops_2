@@ -11,7 +11,7 @@ setwd(this.dir)
 # Plot outputs are written under production/final_viz/output.
 output_dir <- "./output"
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
-out_file <- function(filename) file.path(output_dir, filename)
+# custom_out_file function is already defined in regression.R with suffix support
 
 library(ggh4x)
 library(patchwork)
@@ -20,17 +20,17 @@ library(patchwork)
 
 # Convert model outputs to plotting tables.
 data$vot_fitted <- exp(fitted(m_vot))
-data$f0_fitted <- fitted(m_f0)
+data$semitone_fitted <- fitted(m_semitone)
 
 scenarios_long <- scenarios %>%
-  pivot_longer(cols = c(predicted_vot, predicted_f0),
+  pivot_longer(cols = c(predicted_vot, predicted_semitone),
                names_to = "measure",
                values_to = "value") %>%
   mutate(phonation = factor(phonation,
                             levels = c("aspirated", "fortis", "lenis"))) %>%
   mutate(measure = factor(measure,
-                          levels = c("predicted_vot", "predicted_f0"),
-                          labels = c("Predicted VOT (ms)", "Predicted F0 (Hz)")))
+                          levels = c("predicted_vot", "predicted_semitone"),
+                          labels = c("Predicted VOT (ms)", "Predicted Semitone (ST)")))
 
 # Predicted trajectories.
 ggplot(scenarios_long, aes(x = age, y = value,
@@ -40,11 +40,11 @@ ggplot(scenarios_long, aes(x = age, y = value,
   facetted_pos_scales(
     y = list(
       `Predicted VOT (ms)` = scale_y_continuous(limits = c(0, 100)),
-      `Predicted F0 (Hz)` = scale_y_continuous(limits = c(100, 300))
+      `Predicted Semitone (ST)` = scale_y_continuous()
     )
   ) +
   labs(
-    title = "Predicted VOT and F0 by Phonation, Gender, and Age",
+    title = "Predicted VOT and Semitone by Phonation, Gender, and Age",
     x = "Age (years)",
     y = "",
     color = "Stop Category",
@@ -57,16 +57,16 @@ ggplot(scenarios_long, aes(x = age, y = value,
   theme(plot.background = element_rect(fill = "white", color = NA),
         panel.background = element_rect(fill = "white", color = NA))
 
-ggsave(out_file("predicted_vot_f0.png"), width = 5, height = 5, dpi = 300)
+ggsave(custom_out_file("predicted_vot_semitone.png"), width = 5, height = 5, dpi = 300)
 
 # Observed trajectories.
 data_long <- data %>%
-  pivot_longer(cols = c(vot, f0),
+  pivot_longer(cols = c(vot, semitone),
                names_to = "measure",
                values_to = "value") %>%
   mutate(measure = factor(measure,
-                          levels = c("vot", "f0"),
-                          labels = c("VOT (ms)", "F0 (Hz)")))
+                          levels = c("vot", "semitone"),
+                          labels = c("VOT (ms)", "Semitone (ST)")))
 
 ggplot(data_long, aes(x = age, y = value,
                       color = phonation, linetype = gender)) +
@@ -75,11 +75,11 @@ ggplot(data_long, aes(x = age, y = value,
   facetted_pos_scales(
     y = list(
       `VOT (ms)` = scale_y_continuous(limits = c(0, 100)),
-      `F0 (Hz)` = scale_y_continuous(limits = c(100, 300))
+      `Semitone (ST)` = scale_y_continuous()
     )
   ) +
   labs(
-    title = "VOT and F0 by Phonation, Gender, and Age",
+    title = "VOT and Semitone by Phonation, Gender, and Age",
     x = "Age (years)",
     y = "",
     color = "Stop Category",
@@ -94,15 +94,15 @@ ggplot(data_long, aes(x = age, y = value,
         panel.background = element_rect(fill = "white", color = NA)) +
   xlim(20, 72)
 
-ggsave(out_file("observed_vot_f0.png"), width = 5, height = 5, dpi = 300)
+ggsave(custom_out_file("observed_vot_semitone.png"), width = 5, height = 5, dpi = 300)
 
 # ===== Observed vs Predicted Lines =====
 
 data_vot <- data_long %>% filter(measure == "VOT (ms)")
-data_f0 <- data_long %>% filter(measure == "F0 (Hz)")
+data_semitone <- data_long %>% filter(measure == "Semitone (ST)")
 
 scenarios_vot <- scenarios_long %>% filter(measure == "Predicted VOT (ms)")
-scenarios_f0 <- scenarios_long %>% filter(measure == "Predicted F0 (Hz)")
+scenarios_semitone <- scenarios_long %>% filter(measure == "Predicted Semitone (ST)")
 
 p1 <- ggplot(data_vot, aes(x = age, y = value, color = phonation)) +
   geom_smooth(aes(linetype = gender), method = "lm", se = FALSE, linewidth = 0.5) +
@@ -127,10 +127,9 @@ p2 <- ggplot(scenarios_vot, aes(x = age, y = value,
   theme(plot.title = element_text(hjust = 0.5)) +
   xlim(20, 72)
 
-p3 <- ggplot(data_f0, aes(x = age, y = value, color = phonation)) +
+p3 <- ggplot(data_semitone, aes(x = age, y = value, color = phonation)) +
   geom_smooth(aes(linetype = gender), method = "lm", se = FALSE, linewidth = 0.5) +
-  scale_y_continuous(limits = c(100, 300)) +
-  labs(x = "Age", y = "Mean f0 (Hz)", color = "Stop Category", linetype = "Gender") +
+  labs(x = "Age", y = "Mean Semitone (ST)", color = "Stop Category", linetype = "Gender") +
   scale_color_manual(values = c("lenis" = "#1f77b4",
                                 "aspirated" = "#2ca02c",
                                 "fortis" = "#ff7f0e")) +
@@ -138,11 +137,10 @@ p3 <- ggplot(data_f0, aes(x = age, y = value, color = phonation)) +
   theme(plot.title = element_text(hjust = 0.5)) +
   xlim(20, 72)
 
-p4 <- ggplot(scenarios_f0, aes(x = age, y = value,
+p4 <- ggplot(scenarios_semitone, aes(x = age, y = value,
                                color = phonation, linetype = gender)) +
   geom_line(linewidth = 0.5) +
-  scale_y_continuous(limits = c(100, 300)) +
-  labs(x = "Age", y = "f0 (Hz)", color = "Stop Category", linetype = "Gender") +
+  labs(x = "Age", y = "Semitone (ST)", color = "Stop Category", linetype = "Gender") +
   scale_color_manual(values = c("lenis" = "#1f77b4",
                                 "aspirated" = "#2ca02c",
                                 "fortis" = "#ff7f0e")) +
@@ -158,7 +156,7 @@ p1 / p3 +
   ) &
   guides(linetype = guide_legend(override.aes = list(color = "black", linewidth = 0.5)))
 
-ggsave(out_file("vot_f0_observed_lines.png"), width = 3, height = 5, dpi = 300, bg = "white")
+ggsave(custom_out_file("vot_semitone_observed_lines.png"), width = 3, height = 5, dpi = 300, bg = "white")
 
 p2 / p4 +
   plot_layout(guides = "collect") +
@@ -168,7 +166,7 @@ p2 / p4 +
   ) &
   guides(linetype = guide_legend(override.aes = list(color = "black", linewidth = 0.5)))
 
-ggsave(out_file("vot_f0_predicted_lines.png"), width = 3, height = 5, dpi = 300, bg = "white")
+ggsave(custom_out_file("vot_semitone_predicted_lines.png"), width = 3, height = 5, dpi = 300, bg = "white")
 
 # ===== Model Predictions With CI =====
 pred_vot <- ggpredict(m_vot,
@@ -211,23 +209,23 @@ p1 <- ggplot(pred_vot_df, aes(x = x, y = predicted, color = group, fill = group)
   labs(title = "VOT", x = "Age (SD from mean)", y = "VOT (ms)") +
   theme_minimal()
 
-pred_f0 <- ggpredict(m_f0,
+pred_semitone <- ggpredict(m_semitone,
                      terms = c("normed_age [-2:2, by=0.1]",
                                "phonation",
                                "gender"))
 
-pred_f0_df <- as.data.frame(pred_f0) %>%
+pred_semitone_df <- as.data.frame(pred_semitone) %>%
   mutate(
     group = factor(group, levels = c("lenis", "aspirated", "fortis")),
     facet = factor(facet, levels = c("female", "male"))
   )
 
-cat("\n===== F0 Predictions Debug =====\n")
-cat("pred_f0_df dimensions:", nrow(pred_f0_df), "x", ncol(pred_f0_df), "\n")
-cat("pred_f0_df columns:", paste(names(pred_f0_df), collapse = ", "), "\n")
-print(table(pred_f0_df$facet, pred_f0_df$group))
+cat("\n===== Semitone Predictions Debug =====\n")
+cat("pred_semitone_df dimensions:", nrow(pred_semitone_df), "x", ncol(pred_semitone_df), "\n")
+cat("pred_semitone_df columns:", paste(names(pred_semitone_df), collapse = ", "), "\n")
+print(table(pred_semitone_df$facet, pred_semitone_df$group))
 
-p2 <- ggplot(pred_f0_df, aes(x = x, y = predicted, color = group, fill = group)) +
+p2 <- ggplot(pred_semitone_df, aes(x = x, y = predicted, color = group, fill = group)) +
   geom_ribbon(aes(ymin = conf.low, ymax = conf.high, group = interaction(group, facet)),
               alpha = 0.15, color = NA) +
   geom_line(aes(group = interaction(group, facet)), linewidth = 0.5) +
@@ -245,7 +243,7 @@ p2 <- ggplot(pred_f0_df, aes(x = x, y = predicted, color = group, fill = group))
                "aspirated" = "#2ca02c",
                "fortis" = "#ff7f0e")
   ) +
-  labs(title = "f0", x = "Age (SD from mean)", y = "f0 (Hz)") +
+  labs(title = "Semitone", x = "Age (SD from mean)", y = "Semitone (ST)") +
   theme_minimal()
 
 p1 + p2 +
@@ -272,7 +270,7 @@ p1 + p2 +
     )
   )
 
-ggsave(out_file("observed_vs_predicted_vot_f0.png"),
+ggsave(custom_out_file("observed_vs_predicted_vot_semitone.png"),
        width = 12, height = 6, dpi = 300, bg = "white")
 
 # ===== Observed vs Predicted Scatter =====
@@ -295,7 +293,7 @@ ggplot(data, aes(x = vot_fitted, y = vot, color = phonation)) +
   theme_minimal() +
   theme(legend.position = "bottom")
 
-ggsave(out_file("vot_observed_vs_predicted.png"), width = 5, height = 5, dpi = 300)
+ggsave(custom_out_file("vot_observed_vs_predicted.png"), width = 5, height = 5, dpi = 300)
 
 p1 <- ggplot(data, aes(x = vot_fitted, y = vot, color = phonation)) +
   geom_point(alpha = 0.2, size = 1) +
@@ -313,18 +311,18 @@ p1 <- ggplot(data, aes(x = vot_fitted, y = vot, color = phonation)) +
   ) +
   theme_minimal()
 
-p2 <- ggplot(data, aes(x = f0_fitted, y = f0, color = phonation)) +
+p2 <- ggplot(data, aes(x = semitone_fitted, y = semitone, color = phonation)) +
   geom_point(alpha = 0.2, size = 1) +
   geom_abline(slope = 1, intercept = 0,
               color = "black", linetype = "dashed", linewidth = 1) +
   scale_color_manual(values = c("lenis" = "#1f77b4",
                                 "aspirated" = "#2ca02c",
                                 "fortis" = "#ff7f0e")) +
-  coord_equal(xlim = c(0, 400), ylim = c(0, 400)) +
+  coord_equal() +
   labs(
-    title = "F0",
-    x = "Predicted F0 (Hz)",
-    y = "Observed F0 (Hz)",
+    title = "Semitone",
+    x = "Predicted Semitone (ST)",
+    y = "Observed Semitone (ST)",
     color = "Phonation"
   ) +
   theme_minimal() +
@@ -333,12 +331,12 @@ p2 <- ggplot(data, aes(x = f0_fitted, y = f0, color = phonation)) +
 p1 + p2 +
   plot_layout(guides = "collect") +
   plot_annotation(
-    title = "Observed vs Predicted VOT and F0",
+    title = "Observed vs Predicted VOT and Semitone",
     subtitle = "Dashed line = perfect prediction"
   ) &
   theme(legend.position = "bottom")
 
-ggsave(out_file("observed_vs_predicted_vot_f0_scatter.png"),
+ggsave(custom_out_file("observed_vs_predicted_vot_semitone_scatter.png"),
        width = 12, height = 6, dpi = 300, bg = "white")
 
 # ===== Visualize Models =====
@@ -367,15 +365,16 @@ emmip(m_vot, ~ normed_word_duration,
 emmip(m_vot, ~ z_log_morpheme_freq,
       cov.reduce = range)
 
-plot(allEffects(m_f0),
+plot(allEffects(m_semitone),
      multiline = TRUE)
 
-emmip(m_f0, gender ~ normed_age | phonation,
+emmip(m_semitone, gender ~ normed_age | phonation,
       cov.reduce = range)
 
-emmip(m_f0, phonation ~ gender,
+emmip(m_semitone, phonation ~ gender,
       cov.reduce = range)
 
-# meaningless bc of big f0 diff btwn female & male
-emmip(m_f0, phonation ~ normed_age,
+# meaningless bc of big semitone diff btwn female & male
+emmip(m_semitone, phonation ~ normed_age,
       cov.reduce = range)
+

@@ -63,11 +63,17 @@ data$prolific_id <- as.factor(data$prolific_id)
 data$phonation <- factor(data$phonation, levels = c("aspirated", "fortis", "lenis"))
 data$phonation <- relevel(data$phonation, ref = "lenis")
 data$gender <- factor(data$gender, levels = c("Female", "Male"), labels = c("female", "male"))
+# Ensure rime is a factor with 'i' as reference level
+if ('rime' %in% names(data)) {
+  data$rime <- factor(data$rime)
+  if ('i' %in% levels(data$rime)) data$rime <- relevel(data$rime, ref = 'i')
+}
+
 
 # 확인 및 NA 제거
 sum(is.na(data$phonation))  # 0 이어야 함
-data <- data[!is.na(data$vot), ]  # vot NA 제거
-data <- data[!is.na(data$f0), ]   # f0 NA 제거
+data <- data[!is.na(data$vot), ]       # vot NA 제거
+data <- data[!is.na(data$semitone), ] # semitone NA 제거
 
 # 3) overlap용 벡터 생성
 young_female_asp_vot <- with(data, vot[phonation == "aspirated" & gender == "female" & age < 40])
@@ -121,113 +127,113 @@ vot_ovl_asp_lenis_young_male <- overlap(vot_list)$OV
 cat("Young Female Overlap:", vot_ovl_asp_lenis_young_female, "\n")
 cat("Young Male Overlap:", vot_ovl_asp_lenis_young_male, "\n")
 
-# == ASP vs LENIS F0 ==
+# == ASP vs LENIS SEMITONE ==
 
-## YOUNG FEAMLE f0: ASP vs LENIS
-young_female_asp_f0 <- data$f0[data$phonation == "aspirated" & data$gender == "female" & data$age < 40]
-young_female_lenis_f0 <- data$f0[data$phonation == "lenis" & data$gender == "female" & data$age < 40]
-
-# Create a named list
-f0_list <- list(Aspirated = young_female_asp_f0, Lenis = young_female_lenis_f0)
-
-# Calculate overlap
-f0_ovl_asp_lenis_young_female <- overlap(f0_list)$OV
-
-## OLD FEAMLE f0: ASP vs LENIS
-old_female_asp_f0 <- data$f0[data$phonation == "aspirated" & data$gender == "female" & data$age > 59]
-old_female_lenis_f0 <- data$f0[data$phonation == "lenis" & data$gender == "female" & data$age > 59]
+## YOUNG FEAMLE semitone: ASP vs LENIS
+young_female_asp_semitone <- data$semitone[data$phonation == "aspirated" & data$gender == "female" & data$age < 40]
+young_female_lenis_semitone <- data$semitone[data$phonation == "lenis" & data$gender == "female" & data$age < 40]
 
 # Create a named list
-f0_list <- list(Aspirated = old_female_asp_f0, Lenis = old_female_lenis_f0)
+semitone_list <- list(Aspirated = young_female_asp_semitone, Lenis = young_female_lenis_semitone)
 
 # Calculate overlap
-f0_ovl_asp_lenis_old_female <- overlap(f0_list)$OV
+semitone_ovl_asp_lenis_young_female <- overlap(semitone_list)$OV
+
+## OLD FEAMLE semitone: ASP vs LENIS
+old_female_asp_semitone <- data$semitone[data$phonation == "aspirated" & data$gender == "female" & data$age > 59]
+old_female_lenis_semitone <- data$semitone[data$phonation == "lenis" & data$gender == "female" & data$age > 59]
+
+# Create a named list
+semitone_list <- list(Aspirated = old_female_asp_semitone, Lenis = old_female_lenis_semitone)
+
+# Calculate overlap
+semitone_ovl_asp_lenis_old_female <- overlap(semitone_list)$OV
 
 # Compare
-cat("Young Female Overlap:", f0_ovl_asp_lenis_young_female, "\n")
-cat("Older Female Overlap:", f0_ovl_asp_lenis_old_female, "\n")
+cat("Young Female Overlap:", semitone_ovl_asp_lenis_young_female, "\n")
+cat("Older Female Overlap:", semitone_ovl_asp_lenis_old_female, "\n")
 
-## OLD MALE f0: ASP vs LENIS
-old_male_asp_f0 <- data$f0[data$phonation == "aspirated" & data$gender == "male" & data$age > 59]
-old_male_lenis_f0 <- data$f0[data$phonation == "lenis" & data$gender == "male" & data$age > 59]
+## OLD MALE semitone: ASP vs LENIS
+old_male_asp_semitone <- data$semitone[data$phonation == "aspirated" & data$gender == "male" & data$age > 59]
+old_male_lenis_semitone <- data$semitone[data$phonation == "lenis" & data$gender == "male" & data$age > 59]
 
 # Create a named list
-f0_list <- list(Aspirated = old_male_asp_f0, Lenis = old_male_lenis_f0)
+semitone_list <- list(Aspirated = old_male_asp_semitone, Lenis = old_male_lenis_semitone)
 
 # Calculate overlap
-f0_ovl_asp_lenis_old_male <- overlap(f0_list)$OV
+semitone_ovl_asp_lenis_old_male <- overlap(semitone_list)$OV
 
 # Compare
-cat("Young Female Overlap:", f0_ovl_asp_lenis_young_female, "\n")
-cat("Older Male Overlap:", f0_ovl_asp_lenis_old_male, "\n")
+cat("Young Female Overlap:", semitone_ovl_asp_lenis_young_female, "\n")
+cat("Older Male Overlap:", semitone_ovl_asp_lenis_old_male, "\n")
 
-## YOUNG MALE f0: ASP vs LENIS
-young_male_asp_f0 <- data$f0[data$phonation == "aspirated" & data$gender == "male" & data$age < 40]
-young_male_lenis_f0 <- data$f0[data$phonation == "lenis" & data$gender == "male" & data$age < 40]
+## YOUNG MALE semitone: ASP vs LENIS
+young_male_asp_semitone <- data$semitone[data$phonation == "aspirated" & data$gender == "male" & data$age < 40]
+young_male_lenis_semitone <- data$semitone[data$phonation == "lenis" & data$gender == "male" & data$age < 40]
 
 # Create a named list
-f0_list <- list(Aspirated = young_male_asp_f0, Lenis = young_male_lenis_f0)
+semitone_list <- list(Aspirated = young_male_asp_semitone, Lenis = young_male_lenis_semitone)
 
 # Calculate overlap
-f0_ovl_asp_lenis_young_male <- overlap(f0_list)$OV
+semitone_ovl_asp_lenis_young_male <- overlap(semitone_list)$OV
 
 # Compare
-cat("Young Female Overlap:", f0_ovl_asp_lenis_young_female, "\n")
-cat("Young Male Overlap:", f0_ovl_asp_lenis_young_male, "\n")
+cat("Young Female Overlap:", semitone_ovl_asp_lenis_young_female, "\n")
+cat("Young Male Overlap:", semitone_ovl_asp_lenis_young_male, "\n")
 
-# == ASP vs FORTIS F0 ==
+# == ASP vs FORTIS SEMITONE ==
 
-## YOUNG FEAMLE f0: ASP vs fortis
-young_female_asp_f0 <- data$f0[data$phonation == "aspirated" & data$gender == "female" & data$age < 40]
-young_female_fortis_f0 <- data$f0[data$phonation == "fortis" & data$gender == "female" & data$age < 40]
-
-# Create a named list
-f0_list <- list(Aspirated = young_female_asp_f0, fortis = young_female_fortis_f0)
-
-# Calculate overlap
-f0_ovl_asp_fortis_young_female <- overlap(f0_list)$OV
-
-## OLD FEAMLE f0: ASP vs fortis
-old_female_asp_f0 <- data$f0[data$phonation == "aspirated" & data$gender == "female" & data$age > 59]
-old_female_fortis_f0 <- data$f0[data$phonation == "fortis" & data$gender == "female" & data$age > 59]
+## YOUNG FEAMLE semitone: ASP vs fortis
+young_female_asp_semitone <- data$semitone[data$phonation == "aspirated" & data$gender == "female" & data$age < 40]
+young_female_fortis_semitone <- data$semitone[data$phonation == "fortis" & data$gender == "female" & data$age < 40]
 
 # Create a named list
-f0_list <- list(Aspirated = old_female_asp_f0, fortis = old_female_fortis_f0)
+semitone_list <- list(Aspirated = young_female_asp_semitone, fortis = young_female_fortis_semitone)
 
 # Calculate overlap
-f0_ovl_asp_fortis_old_female <- overlap(f0_list)$OV
+semitone_ovl_asp_fortis_young_female <- overlap(semitone_list)$OV
+
+## OLD FEAMLE semitone: ASP vs fortis
+old_female_asp_semitone <- data$semitone[data$phonation == "aspirated" & data$gender == "female" & data$age > 59]
+old_female_fortis_semitone <- data$semitone[data$phonation == "fortis" & data$gender == "female" & data$age > 59]
+
+# Create a named list
+semitone_list <- list(Aspirated = old_female_asp_semitone, fortis = old_female_fortis_semitone)
+
+# Calculate overlap
+semitone_ovl_asp_fortis_old_female <- overlap(semitone_list)$OV
 
 # Compare
-cat("Young Female Overlap:", f0_ovl_asp_fortis_young_female, "\n")
-cat("Older Female Overlap:", f0_ovl_asp_fortis_old_female, "\n")
+cat("Young Female Overlap:", semitone_ovl_asp_fortis_young_female, "\n")
+cat("Older Female Overlap:", semitone_ovl_asp_fortis_old_female, "\n")
 
-## OLD MALE f0: ASP vs fortis
-old_male_asp_f0 <- data$f0[data$phonation == "aspirated" & data$gender == "male" & data$age > 59]
-old_male_fortis_f0 <- data$f0[data$phonation == "fortis" & data$gender == "male" & data$age > 59]
-
-# Create a named list
-f0_list <- list(Aspirated = old_male_asp_f0, fortis = old_male_fortis_f0)
-
-# Calculate overlap
-f0_ovl_asp_fortis_old_male <- overlap(f0_list)$OV
-
-# Compare
-cat("Young Female Overlap:", f0_ovl_asp_fortis_young_female, "\n")
-cat("Older Male Overlap:", f0_ovl_asp_fortis_old_male, "\n")
-
-## YOUNG MALE f0: ASP vs fortis
-young_male_asp_f0 <- data$f0[data$phonation == "aspirated" & data$gender == "male" & data$age < 40]
-young_male_fortis_f0 <- data$f0[data$phonation == "fortis" & data$gender == "male" & data$age < 40]
+## OLD MALE semitone: ASP vs fortis
+old_male_asp_semitone <- data$semitone[data$phonation == "aspirated" & data$gender == "male" & data$age > 59]
+old_male_fortis_semitone <- data$semitone[data$phonation == "fortis" & data$gender == "male" & data$age > 59]
 
 # Create a named list
-f0_list <- list(Aspirated = young_male_asp_f0, fortis = young_male_fortis_f0)
+semitone_list <- list(Aspirated = old_male_asp_semitone, fortis = old_male_fortis_semitone)
 
 # Calculate overlap
-f0_ovl_asp_fortis_young_male <- overlap(f0_list)$OV
+semitone_ovl_asp_fortis_old_male <- overlap(semitone_list)$OV
 
 # Compare
-cat("Young Female Overlap:", f0_ovl_asp_fortis_young_female, "\n")
-cat("Young Male Overlap:", f0_ovl_asp_fortis_young_male, "\n")
+cat("Young Female Overlap:", semitone_ovl_asp_fortis_young_female, "\n")
+cat("Older Male Overlap:", semitone_ovl_asp_fortis_old_male, "\n")
+
+## YOUNG MALE semitone: ASP vs fortis
+young_male_asp_semitone <- data$semitone[data$phonation == "aspirated" & data$gender == "male" & data$age < 40]
+young_male_fortis_semitone <- data$semitone[data$phonation == "fortis" & data$gender == "male" & data$age < 40]
+
+# Create a named list
+semitone_list <- list(Aspirated = young_male_asp_semitone, fortis = young_male_fortis_semitone)
+
+# Calculate overlap
+semitone_ovl_asp_fortis_young_male <- overlap(semitone_list)$OV
+
+# Compare
+cat("Young Female Overlap:", semitone_ovl_asp_fortis_young_female, "\n")
+cat("Young Male Overlap:", semitone_ovl_asp_fortis_young_male, "\n")
 
 
 
@@ -248,13 +254,13 @@ emmeans(m_vot_gender, specs = pairwise ~ gender | phonation, type = "response")
 
 # 1. Compare random slope vs no
 m_vot_no_random_slope  <- lmer(
-  log_vot ~ phonation * gender * normed_age + poa  + normed_word_duration +
+  log_vot ~ phonation * gender * normed_age + poa + normed_word_duration +
     (1 | prolific_id) + (1 | item),
   data = data
 )
 
 m_vot_yes_random_slope <- lmer(
-  log_vot ~ phonation * gender * normed_age + poa  + normed_word_duration +
+  log_vot ~ phonation * gender * normed_age + poa + normed_word_duration +
     (1 + phonation | prolific_id) + (1 | item),
   data = data
 )
@@ -264,14 +270,14 @@ anova(m_vot_no_random_slope, m_vot_yes_random_slope)
 
 # 2. Compare by-item random effect vs no
 m_vot_yes_item_random_effect <- lmer(
-  log_vot ~ phonation * gender * normed_age + poa  + normed_word_duration +
+  log_vot ~ phonation * gender * normed_age + poa + normed_word_duration +
     (1 + phonation | prolific_id) + (1 | item),
   data = data
 )
 summary(m_vot_yes_item_random_effect)
 
 m_vot_no_item_random_effect <- lmer(
-  log_vot ~ phonation * gender * normed_age + poa  + normed_word_duration +
+  log_vot ~ phonation * gender * normed_age + poa + normed_word_duration +
     (1 + phonation | prolific_id),
   data = data
 )
@@ -347,7 +353,7 @@ anova(m_vot_no_phon_age_interaction, m_vot_no_gender_age_interaction)
 m_vot_lexical_freq <- lmer(
   log_vot ~ phonation + gender + normed_age 
   + phonation:gender + phonation:normed_age
-  + poa  + normed_word_duration + z_log_morpheme_freq
+  + poa  + normed_word_duration + z_log_morpheme_freq + rime
   + (1 + phonation | prolific_id) + (1 | item),
   data = data,
   REML = FALSE # for AIC, BIC comparisons
@@ -362,16 +368,6 @@ m_vot_syllable_freq <- lmer(
 )
 AIC(m_vot_lexical_freq, m_vot_syllable_freq) # lexical_freq is better
 BIC(m_vot_lexical_freq, m_vot_syllable_freq) # lexical_freq is better
-
-# change the better frequency model back to REML
-m_vot_lexical_freq <- lmer(
-  log_vot ~ phonation + gender + normed_age 
-  + phonation:gender + phonation:normed_age
-  + poa  + normed_word_duration + z_log_morpheme_freq
-  + (1 + phonation | prolific_id) + (1 | item),
-  data = data,
-  REML = TRUE
-)
 
 anova(m_vot_lexical_freq, m_vot_no_gender_age_interaction)
 # larger model is better
@@ -408,7 +404,7 @@ summary(m_vot)
 m_vot_phon_freq_interaction <- lmer(
   log_vot ~ phonation + gender + normed_age 
   + phonation:gender + phonation:normed_age
-  + poa  + normed_word_duration + z_log_morpheme_freq
+  + poa  + normed_word_duration + z_log_morpheme_freq + rime
   + z_log_morpheme_freq:phonation
   + (1 + phonation | prolific_id) + (1 | item),
   data = data
@@ -437,42 +433,43 @@ m_vot_result <- m_vot_result %>%
 # 3. CSV로 저장
 write.csv(m_vot_result, custom_out_file("vot_lmer_results_with_p_values.csv"), row.names = FALSE)
 
-# === F0 MODELS ===
+# === Semitone MODELS ===
 
-m_f0 <- lmer(
-  f0 ~ phonation * gender * normed_age + poa  + normed_word_duration + 
+m_semitone <- lmer(
+  semitone ~ phonation * gender * normed_age + poa  + normed_word_duration +
     (1 + phonation | prolific_id) + (1 | item),
   data = data
 )
 
-m_f0_no_poa <- lmer(
-  f0 ~ phonation * gender * normed_age + normed_word_duration + 
+m_semitone_no_poa <- lmer(
+  semitone ~ phonation * gender * normed_age + normed_word_duration +
     (1 + phonation | prolific_id) + (1 | item),
   data = data
 )
 
-anova(m_f0_no_poa, m_f0)
+anova(m_semitone_no_poa, m_semitone)
 # TAKEAWAY: DON'T include POA
 
-m_f0_no_poa_no_dur <- lmer(
-  f0 ~ phonation + gender + normed_age
+m_semitone_no_poa_no_dur <- lmer(
+  semitone ~ phonation + gender + normed_age
   + phonation:gender + phonation:normed_age + gender:normed_age
   + phonation:gender:normed_age 
+  + rime
   + (1 + phonation | prolific_id) + (1 | item),
   data = data
 )
 
-anova(m_f0_no_poa, m_f0_no_poa_no_dur)
+anova(m_semitone_no_poa, m_semitone_no_poa_no_dur)
 # TAKEAWAY: DON'T include WORD_DURATION
 
-m_f0_no_three_way_interaction <- lmer(
-  f0 ~ phonation + gender + normed_age
+m_semitone_no_three_way_interaction <- lmer(
+  semitone ~ phonation + gender + normed_age
   + phonation:gender + phonation:normed_age + gender:normed_age 
   + (1 + phonation | prolific_id) + (1 | item),
   data = data
 )
 
-anova(m_f0_no_three_way_interaction, m_f0_no_poa_no_dur)
+anova(m_semitone_no_three_way_interaction, m_semitone_no_poa_no_dur)
 # Larger model is significantly better than smaller model.
 # TAKEAWAY: keep three-way interaction
 
@@ -480,16 +477,16 @@ anova(m_f0_no_three_way_interaction, m_f0_no_poa_no_dur)
 # A. test their overall significance using type 3 anova
 
 library(car)
-Anova(m_f0_no_poa_no_dur, type = 3)
+Anova(m_semitone_no_poa_no_dur, type = 3)
 # TAKEAWAY: three-way interaction IS significant
 
-# WINNER: m_f0_no_poa_no_dur
-m_f0 <- m_f0_no_poa_no_dur
-summary(m_f0)
+# WINNER: m_semitone_no_poa_no_dur
+m_semitone <- m_semitone_no_poa_no_dur
+summary(m_semitone)
 
 # FREQUENCY (NOT USED) 
-m_f0_lexical_freq <- lmer(
-  f0 ~ phonation + gender + normed_age
+m_semitone_lexical_freq <- lmer(
+  semitone ~ phonation + gender + normed_age
   + phonation:gender + phonation:normed_age + gender:normed_age
   + phonation:gender:normed_age
   + z_log_morpheme_freq
@@ -497,8 +494,8 @@ m_f0_lexical_freq <- lmer(
   data = data
 )
 
-m_f0_syllable_freq <- lmer(
-  f0 ~ phonation + gender + normed_age
+m_semitone_syllable_freq <- lmer(
+  semitone ~ phonation + gender + normed_age
   + phonation:gender + phonation:normed_age + gender:normed_age
   + phonation:gender:normed_age
   + z_log_syllable_freq
@@ -510,8 +507,8 @@ m_f0_syllable_freq <- lmer(
   )
 )
 
-anova(m_f0, m_f0_lexical_freq)
-anova(m_f0, m_f0_syllable_freq)
+anova(m_semitone, m_semitone_lexical_freq)
+anova(m_semitone, m_semitone_syllable_freq)
 
 # TAKEAWAY: BOTH FREQ are bad predictors
 
@@ -519,7 +516,7 @@ anova(m_f0, m_f0_syllable_freq)
 
 # m_vot is fit on log_vot, so convert fitted values back to ms for plotting.
 data$vot_fitted <- exp(fitted(m_vot))
-data$f0_fitted <- fitted(m_f0)
+data$semitone_fitted <- fitted(m_semitone)
 
 # 나이 평균/표준편차 계산
 age_mean <- mean(data$age, na.rm = TRUE)
@@ -552,20 +549,20 @@ scenarios <- expand.grid(
 # 예측
 # m_vot predictions are on log scale; back-transform to VOT ms.
 scenarios$predicted_vot <- exp(predict(m_vot, newdata = scenarios, re.form = NA))
-scenarios$predicted_f0 <- predict(m_f0, newdata = scenarios, re.form = NA)
+scenarios$predicted_semitone <- predict(m_semitone, newdata = scenarios, re.form = NA)
 
 scenarios
-write.csv(scenarios, custom_out_file("vot_f0_predictions.csv"), row.names = FALSE)
+write.csv(scenarios, custom_out_file("vot_semitone_predictions.csv"), row.names = FALSE)
 
 # 또는 더 깔끔하게 정리해서 저장
 scenarios_clean <- scenarios %>%
   dplyr::mutate(
     predicted_vot = round(predicted_vot, 2),
-    predicted_f0 = round(predicted_f0, 2)
+    predicted_semitone = round(predicted_semitone, 2)
   ) %>%
   dplyr::arrange(gender, phonation, normed_age)
 
-write.csv(scenarios_clean, custom_out_file("vot_f0_predictions_clean.csv"), row.names = FALSE)
+write.csv(scenarios_clean, custom_out_file("vot_semitone_predictions_clean.csv"), row.names = FALSE)
 
 # ===== Lenis stops만 =====
 
@@ -575,7 +572,7 @@ data_lenis <- data %>%
 
 m_vot_lenis <- lmer(
   vot ~ gender:normed_age
-  + poa  + normed_word_duration + z_log_morpheme_freq
+  + poa  + normed_word_duration + z_log_morpheme_freq + rime
   + (1 | prolific_id) + (1 | item),
   data = data_lenis
 )
@@ -601,7 +598,7 @@ data_asp <- data %>%
 
 m_vot_asp <- lmer(
   vot ~ gender:normed_age
-  + poa  + normed_word_duration + z_log_morpheme_freq
+  + poa  + normed_word_duration + z_log_morpheme_freq + rime
   + (1 | prolific_id) + (1 | item),
   data = data_asp
 )
@@ -627,7 +624,7 @@ data_fortis <- data %>%
 
 m_vot_fortis <- lmer(
   vot ~ gender:normed_age
-  + poa  + normed_word_duration + z_log_morpheme_freq
+  + poa  + normed_word_duration + z_log_morpheme_freq + rime
   + (1 | prolific_id) + (1 | item),
   data = data_fortis
 )
@@ -698,17 +695,17 @@ write.csv(vot_random_effects, custom_out_file("vot_model_random_effects.csv"), r
 
 # TODO: remove word duration from VOT model
 # TODO: DISCUSS W INSEONG - think about reference level and coding method (dummy, difference, helmert, etc)
-# TODO: DISCUSS W INSEONG - regression without interaction? maybe predict VOT & f0 using stop_category only,
+# TODO: DISCUSS W INSEONG - regression without interaction? maybe predict VOT & semitone using stop_category only,
 #       and then predict the coefficients of each stop_category using gender & age?
 
 # === Fixed effects 표 ===
-f0_fixed_effects <- tidy(m_f0, effects = "fixed")
+semitone_fixed_effects <- tidy(m_semitone, effects = "fixed")
 
 # CSV 저장
-write.csv(f0_fixed_effects, custom_out_file("f0_model_fixed_effects.csv"), row.names = FALSE)
+write.csv(semitone_fixed_effects, custom_out_file("semitone_model_fixed_effects.csv"), row.names = FALSE)
 
 # 예쁘게 정리
-f0_fixed_effects_clean <- f0_fixed_effects %>%
+semitone_fixed_effects_clean <- semitone_fixed_effects %>%
   dplyr::mutate(
     estimate = round(estimate, 3),
     std.error = round(std.error, 3),
@@ -724,14 +721,14 @@ f0_fixed_effects_clean <- f0_fixed_effects %>%
   ) %>%
   dplyr::select(term, estimate, std.error, statistic, p.value, sig)
 
-write.csv(f0_fixed_effects_clean, custom_out_file("f0_model_fixed_effects_clean.csv"), row.names = FALSE)
+write.csv(semitone_fixed_effects_clean, custom_out_file("semitone_model_fixed_effects_clean.csv"), row.names = FALSE)
 
 # === Random effects 표 ===
 # VarCorr를 DataFrame으로
-f0_random_effects <- as.data.frame(VarCorr(m_f0))
+semitone_random_effects <- as.data.frame(VarCorr(m_semitone))
 
 # 열 이름 정리
-f0_random_effects <- f0_random_effects %>%
+semitone_random_effects <- semitone_random_effects %>%
   dplyr::rename(
     groups = grp,
     variance = vcov
@@ -747,5 +744,5 @@ f0_random_effects <- f0_random_effects %>%
     term2 = var2
   )
 
-write.csv(f0_random_effects, custom_out_file("f0_model_random_effects.csv"), row.names = FALSE)
+write.csv(semitone_random_effects, custom_out_file("semitone_model_random_effects.csv"), row.names = FALSE)
 
