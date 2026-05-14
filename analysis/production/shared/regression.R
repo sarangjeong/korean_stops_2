@@ -404,7 +404,7 @@ summary(m_vot)
 m_vot_phon_freq_interaction <- lmer(
   log_vot ~ phonation + gender + normed_age 
   + phonation:gender + phonation:normed_age
-  + poa  + normed_word_duration + z_log_morpheme_freq + rime
+  + poa  + normed_word_duration + z_log_morpheme_freq
   + z_log_morpheme_freq:phonation
   + (1 + phonation | prolific_id) + (1 | item),
   data = data
@@ -624,7 +624,7 @@ data_fortis <- data %>%
 
 m_vot_fortis <- lmer(
   vot ~ gender:normed_age
-  + poa  + normed_word_duration + z_log_morpheme_freq + rime
+  + poa  + normed_word_duration + z_log_morpheme_freq
   + (1 | prolific_id) + (1 | item),
   data = data_fortis
 )
